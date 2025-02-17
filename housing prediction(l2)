@@ -1,0 +1,51 @@
+#y=mx+mx+mx
+#multiple x values
+
+import pandas as pd
+import matplotlib.pyplot as plt
+#importing data set from skl libary
+from sklearn.datasets import fetch_california_housing 
+
+
+
+
+
+#has lots of info (i.e'target', 'frame', 'target_names', 'feature_names', 'DESCR') (ectract needed info)
+#given as a dictonary 
+housing=fetch_california_housing()
+
+#keys of the dictionary
+print(housing.keys())
+
+#not a part of the data (extra info)
+print(housing['DESCR'])
+
+#data
+print(housing['data'])
+
+#printing target variable
+print(housing['target'])
+
+#changing array (data) to dataframe
+df=pd.DataFrame(housing.data,columns=housing.feature_names)
+
+#TARGET IS EPERATE FROM THE DATA (DEPENDENT VARIABLE ALREADY SPERATED)
+df['AveOccup']=housing.target
+
+
+#print head of data frame conversion
+print(df.head())
+
+
+#choosing desired columns( independent)
+X=df[['HouseAge','AveRooms','Population']]
+
+#target variable (dependent)
+y=df['AveOccup']
+
+#import train test split model
+from sklearn.model_selection import train_test_split
+
+#comon way of test train split 
+#test size is how much (%) will be used for testng the trained output
+X_train, X_test, Y_train, y_test=train_test_split(X, y, test_size = 0.2, random_state=5)
