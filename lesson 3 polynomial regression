@@ -1,0 +1,62 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+#load data
+data=pd.read_csv('C:\\Users\\arran\\OneDrive\\Desktop\\machine learning\\lessons\\polynomial regression\\housing.csv')
+
+#print head
+print(data.head())
+
+#null data
+allnull=data.isnull().sum()
+print(allnull)
+
+
+y=data['MEDV']
+
+X=data[['LSTAT','RM']]
+
+#giving data for graph only
+features=['LSTAT','RM']
+#enumerate - gives a number to what ever is given
+for i,g in enumerate(features):
+    plt.subplot(1,len(features),i+1)
+    plt.scatter(data[g],y,marker='o')
+    plt.title(g)
+    plt.xlabel(g)
+    plt.ylabel('MEDV')
+    plt.show()
+
+
+#train test split
+from sklearn.model_selection import train_test_split
+X_train , X_test , y_train , y_test=train_test_split(X , y , test_size=0.2 , random_state=5)
+
+#see shape of test/train 
+print(X_train.shape)
+print(X_test.shape)
+print(y_train.shape)
+print(y_test.shape)
+
+#polynomial regression (finds un-linear similarities(like a curve(on a graph)))
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn.linear_model import LinearRegression
+
+#adding a degree to existing data
+model=PolynomialFeatures(degree=2)
+model2=LinearRegression()
+
+#fits ploynomial information to X_train_poly
+X_train_poly=model.fit_transform(X_train)
+
+#fitting a linear regression model to trhe polynomial x train and y train
+model2.fit(X_train_poly , y_train)
+
+#
+y_train_pred=model2.predict(model.fit_transform(X_test))
+
+
+
+
+#HW = print rmse and the r2 score and pass polynomial to lesson 2 
