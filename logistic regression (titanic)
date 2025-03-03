@@ -1,0 +1,71 @@
+import numpy as np
+import pandas as pd
+
+
+data=pd.read_csv('C:\\Users\\arran\\OneDrive\\Desktop\\machine learning\\lessons\\logistc regression\\Titanic-Dataset.csv')
+
+#pre processing
+print(data.isnull().sum())
+
+print(data['Embarked'].value_counts().idxmax())
+
+#replace null values / dropping
+data['Age'].fillna(data['Age'].median(skipna=True),inplace=True)
+data['Embarked'].fillna(data['Embarked'].value_counts().idxmax(),inplace=True)
+data.drop(['Name','SibSp', 'Parch', 'Ticket' ,'Cabin','PassengerId'],axis=1,inplace=True)
+
+
+#label encoder (convert categorical to numerical)
+from sklearn import preprocessing
+le=preprocessing.LabelEncoder()
+
+#changes the categorical data to numerical (e.g male=1  female=2)
+#fit compute the parameters but does not immedatly tranasfomr the data
+#transform transforms the data
+data['Sex']=le.fit_transform(data['Sex'])
+data['Embarked']=le.fit_transform(data['Embarked'])
+
+
+print(data.isnull().sum())
+
+
+#independent
+X=data.drop('Survived',axis=1)
+
+#dependent or target variable
+y=data['Survived']
+
+#test train split
+from sklearn.model_selection import train_test_split
+
+X_train , X_test , y_train , y_test = train_test_split(X,y,test_size=0.2,random_state=5)
+
+
+from sklearn.linear_model import LogisticRegression
+
+model=LogisticRegression()
+
+model.fit(X_train , y_train)
+
+pred=model.predict(X_test)
+
+from sklearn.metrics import classification_report, confusion_matrix
+
+#highest percentage = best
+print(classification_report(y_test,pred))
+
+
+#another visuilissation libary
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+#confusion matrix displays how well logistic model has performed
+cm=confusion_matrix(y_test,pred)
+
+
+sns.heatmap(cm,annot=True,fmt='d')
+plt.title('confusion matrix')
+plt.xlabel('predicted')
+plt.ylabel('real data')
+plt.show()
+
