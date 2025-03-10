@@ -1,0 +1,55 @@
+from sklearn.linear_model import LinearRegression
+from sklearn import preprocessing
+import matplotlib.pyplot as plt
+import pandas as pd
+import numpy as np
+
+#pre processing
+data=pd.read_csv('C:\\Users\\arran\\OneDrive\\Desktop\\machine learning\\practise\\homeowork.py\\car.csv')
+
+print(data.isnull().sum())
+
+print(data.dtypes)
+
+#changes cat to num
+le=preprocessing.LabelEncoder()
+data['Buying Price']=le.fit_transform(data['Buying Price'])
+data['Number of Doors']=le.fit_transform(data['Number of Doors'])
+data['Persons Capacity']=le.fit_transform(data['Persons Capacity'])
+data['Maintenance Price']=le.fit_transform(data['Maintenance Price'])
+data['Luggage Boot Size']=le.fit_transform(data['Luggage Boot Size'])
+data['Safety']=le.fit_transform(data['Safety'])
+data['Car Acceptability']=le.fit_transform(data['Car Acceptability'])
+
+#check if le worked
+print(data.head())
+
+#independent
+X=data.drop('Car Acceptability',axis=1)
+
+
+#dependent or target variable
+y=data['Car Acceptability']
+
+#ml
+from sklearn.model_selection import train_test_split
+X_train , X_test , y_train , y_test = train_test_split(X,y,test_size=0.2,random_state=5)
+
+#logistic regression
+from sklearn.linear_model import LogisticRegression
+model=LogisticRegression()
+model.fit(X_train , y_train)
+pred=model.predict(X_test)
+
+#cm
+from sklearn.metrics import classification_report, confusion_matrix
+import seaborn as sns
+
+print(classification_report(y_test,pred))
+
+cm=confusion_matrix(y_test,pred)
+sns.heatmap(cm,annot=True,fmt='d')
+plt.title('confusion matrix')
+plt.xlabel('predicted')
+plt.ylabel('real data')
+plt.show()
