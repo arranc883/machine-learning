@@ -1,0 +1,36 @@
+#predict categorical outputs and regression
+#dont have to scale data
+#handles non linear relationships
+
+import pandas as pd
+import numpy as np
+
+
+#pre processing
+data=pd.read_csv('C:\\Users\\arran\\OneDrive\\Desktop\\machine learning\\lessons\\desision trees\\car.csv')
+data.columns=('sales','maintainace','doors','person','boot_space','saftey','class')
+print(data.isnull().sum())
+print(data.value_counts())
+print(data['class'].unique())
+print(data.info())
+print(data.describe())
+
+for i in data:
+    print(data[i].value_counts())
+
+from sklearn.preprocessing import LabelEncoder
+le=LabelEncoder()
+
+data['sales']=le.fit_transform(data['sales'])
+data['maintainace']=le.fit_transform(data['sales'])
+data['boot_space']=le.fit_transform(data['boot_space'])
+data['saftey']=le.fit_transform(data['saftey'])
+data['class']=le.fit_transform(data['class'])
+
+#manualy replacing values
+data['doors']=data['doors'].replace('5more',5).astype(int)
+data['person']=data['person'].replace('more',5).astype(int)
+
+
+
+#cancer data set{kaggle [any]} and use knn (find t he besrt value for k to optimise output)
