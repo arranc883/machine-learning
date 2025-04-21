@@ -1,0 +1,72 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+#pre processing
+data=pd.read_csv('C:\\Users\\arran\\OneDrive\\Desktop\\machine learning\\practise\\homeowork.py\\Breast_Cancer.csv')
+print(data.isnull().sum())
+
+
+from sklearn.preprocessing import LabelEncoder
+le=LabelEncoder()
+data['Race']=le.fit_transform(data['Race'])
+data['Marital Status']=le.fit_transform(data['Marital Status'])
+data['T Stage']=le.fit_transform(data['T Stage'])
+data['N Stage']=le.fit_transform(data['N Stage'])
+data['6th Stage']=le.fit_transform(data['6th Stage'])
+data['differentiate']=le.fit_transform(data['differentiate'])
+data['Grade']=le.fit_transform(data['Grade'])
+data['A Stage']=le.fit_transform(data['A Stage'])
+data['Estrogen Status']=le.fit_transform(data['Estrogen Status'])
+data['Progesterone Status']=le.fit_transform(data['Progesterone Status'])
+data['Status']=le.fit_transform(data['Status'])
+
+
+
+X=data.drop('Status', axis=1)
+y=data['Status']
+from sklearn.model_selection import train_test_split
+X_train , X_test , y_train , y_test = train_test_split(X,y,test_size=0.2,random_state=5)
+from sklearn.preprocessing import StandardScaler
+ss=StandardScaler()
+ss.fit_transform(X_train)
+ss.fit_transform(X_test)
+
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import accuracy_score
+bestk=5
+bestacuraccy=0
+accscore=[]
+for k in range(5,20):
+    model=KNeighborsClassifier(n_neighbors=k, metric='minkowski', p=3)
+    model.fit(X_train,y_train)
+    pred=model.predict(X_test)
+    acc=accuracy_score(y_test , pred)
+    accscore.append(acc)
+    if acc>bestacuraccy:
+        bestacuraccy=acc
+        bestk=k
+
+
+print(f'the best k value was {bestk} and the best accuracy score was{bestacuraccy}!')
+plt.figure(figsize=(10,6))
+plt.plot((range(5,20)) , accscore , marker='o')
+plt.title('best k value')
+plt.xlabel('predict')
+plt.ylabel('real data')
+plt.show()
+
+knn=KNeighborsClassifier(n_neighbors=bestk, metric='minkowski',p=3)
+knn.fit(X_train,y_train)
+ypred=knn.predict(X_test)
+
+#confusion matrix / classification report
+from sklearn.metrics import classification_report , confusion_matrix
+print(classification_report(y_test , ypred))
+cm=confusion_matrix(y_test,ypred)
+sns.heatmap(cm,annot=True,fmt='d')
+plt.title('confusion matrix')
+plt.xlabel('predicted')
+plt.ylabel('real data')
+plt.show()
