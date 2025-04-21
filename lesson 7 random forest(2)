@@ -1,0 +1,9 @@
+import pandas as pd
+import numpy as np
+data=pd.read_csv('C:\\Users\\Arran\\OneDrive\\Desktop\\machine learning\\data_sets\\Titanic-Dataset.csv')
+data.drop(columns=['PassengerId', 'Name', 'Ticket' , 'Cabin'  , 'Embarked'], inplace=True)
+data['Age']=data['Age'].fillna(data['Age'].median())
+print(data.isnull().sum())
+print(data.info())
+
+#make Sex column int
