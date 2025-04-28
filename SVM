@@ -1,0 +1,62 @@
+import pandas as pd
+from sklearn import datasets
+from sklearn import svm
+from sklearn import metrics
+from sklearn.model_selection import train_test_split
+
+'''#load dataset (fmt not csv (dictionary))
+data=datasets.load_breast_cancer()
+#printing keys of the dictionarys
+print(data.keys())
+#converting data key to data frame
+df=pd.DataFrame(data.data)
+#adding columns headers from dictionary
+df.columns=data.feature_names
+#adding target variable from dictionary
+df['Target_variable']=data.target
+#checking work
+print(df.info())
+
+##########################################
+
+X=df.drop('Target_variable', axis=1)
+y=df['Target_variable']
+
+X_train , X_test , y_train , y_test = train_test_split(X , y ,test_size=0.2 , random_state=5)
+
+#two types of kernel (linear and non-linear)
+model=svm.SVC(kernel='linear')
+model.fit(X_train , y_train)
+y_predict=model.predict(X_test)
+
+#confusion matrix and classification report
+#cr
+from sklearn.metrics import confusion_matrix , classification_report
+print(classification_report(y_test , y_predict))
+
+#cm
+import seaborn as sns
+import matplotlib.pyplot as plt
+matrix=confusion_matrix(y_test , y_predict)
+sns.heatmap(matrix , annot=True , fmt='d')
+plt.title('Cancer dataset (SVM)')
+plt.xlabel('independent')
+plt.ylabel('dependent')
+plt.show()
+'''
+import matplotlib.pyplot as plt
+#visualising the points being seperated on a map
+from sklearn.inspection import DecisionBoundaryDisplay
+cancer = datasets.load_breast_cancer()
+X = cancer.data[:, :2]
+y = cancer.target
+print(X)
+model=svm.SVC(kernel='rbf' , gamma=0.5 ,C=1)
+model.fit(X , y)
+DecisionBoundaryDisplay.from_estimator(model , X , response_method='predict', cmap=plt.cm.Spectral , alpha=0.8 , xlabel='mean radius' , ylabel='mean texture')
+
+
+
+
+plt.scatter(X[:,0] , X[:,1] , c=y , s=20 , edgecolors='k')
+plt.show()
