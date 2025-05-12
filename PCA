@@ -1,0 +1,54 @@
+import pandas as pd
+import numpy as np
+
+data=pd.read_csv('C:\\Users\\Arran\\OneDrive\\Desktop\\machine learning\\data_sets\\Titanic-Dataset.csv')
+
+data.drop(columns=['PassengerId' , 'Name' , 'Cabin' , 'Embarked' , 'Ticket'], inplace=True)
+print(data.isnull().sum())
+print(data.dtypes)
+
+#making all null values mean
+from sklearn.impute import SimpleImputer
+mean_null=SimpleImputer(strategy='mean')
+#appling simple imputer to all null values in Age 
+data['Age']=mean_null.fit_transform(data[['Age']])
+#checking to so if it has worked
+print(data.isnull().sum())
+
+#change sex to int value instead of object
+from sklearn.preprocessing import StandardScaler , LabelEncoder
+le=LabelEncoder()
+data['Sex']=le.fit_transform(data['Sex'])
+
+#creating X and y
+X=data.drop('Survived', axis=1)
+y=data['Survived']
+
+#scaling X
+scaler=StandardScaler()
+X_scaled=scaler.fit_transform(X)
+
+#importing trai test split
+from sklearn.model_selection import train_test_split
+
+
+#model before PCA
+X_train , X_test , y_train , y_test = train_test_split(X_scaled , y , test_size=0.2 , random_state=5)
+
+from sklearn.linear_model import LogisticRegression
+model=LogisticRegression()
+model.fit(X_train , y_train)
+print(f'before PCA {model.score(X_test , y_test)}')
+
+
+
+#applying PCA
+from sklearn.decomposition import PCA
+PCA_applied=PCA(n_components=2)
+PCA_X=PCA.fit_transform(X_scaled)
+
+
+#after applying PCA
+X_train , X_test , y_train , y_test = train_test_split(PCA_X , y , test_size=0.2 , random_state=5)
+model.fit(X_train , y_train)
+print(f'after PCA {model.score(X_test , y_test)}')
