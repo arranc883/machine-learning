@@ -1,0 +1,56 @@
+import pandas as pd
+from sklearn import datasets
+from sklearn import metrics
+from sklearn.model_selection import train_test_split
+
+#load dataset (fmt not csv (dictionary))
+data=datasets.load_breast_cancer()
+#printing keys of the dictionarys
+print(data.keys())
+#converting data key to data frame
+df=pd.DataFrame(data.data)
+#adding columns headers from dictionary
+df.columns=data.feature_names
+#adding target variable from dictionary
+df['Target_variable']=data.target
+#checking work
+print(df.info())
+
+#scalng data(very important for prinicple compenent (this is not a ML MODEL it is used as a prepocessing step))
+from sklearn.preprocessing import MinMaxScaler
+
+#specifying y
+y=data.target
+#scaling X
+scaler=MinMaxScaler()
+X=scaler.fit_transform(df)
+
+
+#PCA not applied reslut
+###############################
+X_train , X_test , y_train , y_test = train_test_split(X , y , test_size=0.2 , random_state=5)
+
+from sklearn.linear_model import LogisticRegression
+model=LogisticRegression()
+model.fit(X_train , y_train)
+print(f'before PCA {model.score(X_test , y_test)}')
+###############################
+
+
+from sklearn.decomposition import PCA
+#n_components = how many important features do we want to shrink down? (removes unecisarry info)
+PCA_applied=PCA(n_components=10)
+#fitting PCA to our X variable
+PCA_X=PCA_applied.fit_transform(X)
+
+
+
+
+#PCA  applied reslut
+#################################
+X_train , X_test , y_train , y_test = train_test_split(PCA_X , y , test_size=0.2 , random_state=5)
+
+model=LogisticRegression()
+model.fit(X_train , y_train)
+print(f'after PCA {model.score(X_test , y_test)}')
+################################
