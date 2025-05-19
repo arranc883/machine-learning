@@ -1,0 +1,31 @@
+import pandas as pd
+import numpy as np
+
+data=pd.read_csv('C:\\Users\\Arran\\OneDrive\\Desktop\\machine learning\\data_sets\\movies_metadata.csv')
+
+#doc frequency is how frequent a word  appeard in a doc
+#idf is how rare the word is across the doc
+from sklearn.feature_extraction.text import TfidfVectorizer
+
+#measures co sign of the anglke between 2 vectors
+from sklearn.metrics.pairwise import cosine_similarity
+
+#create a matrix of different words 
+#(from everysingle word that is in a movie descirption it chekcs other moves descipton for that word )
+
+#the type of words that we dont detect (ie the a (these words have no meaning))
+#we drop these words (ie the name drop words)
+tfidf=TfidfVectorizer(stop_words='english')
+
+#filling null data on overview(desciption)
+data['overview']=data['overview'].fillna('')
+
+#making overview a numerical matrix
+tfidf_matrix=tfidf.fit_transform(data['overview'])
+
+#shows the length and height of a matrix
+print(tfidf_matrix.shape)
+
+
+#gets all the words in this range
+print(tfidf.get_feature_names_out()[1500:1510])
