@@ -1,0 +1,80 @@
+import pandas as pd
+import numpy as np
+
+data=pd.read_csv('C:\\Users\\Arran\\OneDrive\\Desktop\\machine learning\\data_sets\\movies_metadata.csv')
+
+#doc frequency is how frequent a word  appeard in a doc
+#idf is how rare the word is across the doc
+from sklearn.feature_extraction.text import TfidfVectorizer
+
+#measures co sign of the anglke between 2 vectors
+from sklearn.metrics.pairwise import cosine_similarity
+
+#create a matrix of different words 
+#(from everysingle word that is in a movie descirption it chekcs other moves descipton for that word )
+
+#the type of words that we dont detect (ie the a (these words have no meaning))
+#we drop these words (ie the name drop words)
+tfidf=TfidfVectorizer(stop_words='english')
+
+#filling null data on overview(desciption)
+data['overview']=data['overview'].fillna('')
+
+#making overview a numerical matrix
+tfidf_matrix=tfidf.fit_transform(data['overview'])
+
+#shows the length and height of a matrix
+print(tfidf_matrix.shape)
+
+
+#gets all the words in this range
+print(tfidf.get_feature_names_out()[1500:1510])
+
+
+#computing the co sign similarities
+similarity=cosine_similarity(tfidf_matrix,tfidf_matrix)
+
+#print(similarity[:5,:5])
+
+#matching movie types to their index pos
+indices=pd.Series(data.index,index=data['title']).drop_duplicates()
+
+print(indices[0:10])
+
+def reccomendation(title , cosine_sim=similarity):
+    #check if given title exists in data set using index pos ,  
+    #then look up index pos to find that particular movie , 
+    #then get list of movies that are similar to this movie using similarity score,
+    #tag each score to its movie index to sort in descending order,
+    #for everymovie skipping the first match (its self)
+
+    #checkin if title exists
+    if title not in indices:
+        return 'movie title not found in dataset'
+    
+    #index pos of the movie title
+    idx=indices[title]
+
+    #list of movies that are similar
+    sim_score=list(enumerate(similarity[idx]))
+
+    #sorting order [list of tuples]
+    sim_score=sorted(sim_score , key=lambda x:x[1] , reverse=True)
+
+    #skipping the first one(its self)
+    sim_score=sim_score[1:11]
+
+    #looping over all the scores and matching it to its index
+    #the same as:
+
+    #for i in sim_score:
+    #    movie_idx.appened(i[0])
+
+    movie_idx=[i[0] for i in sim_score]
+    return  data['title'].iloc[movie_idx]
+
+
+print(reccomendation('The Dark Knight rises'))
+
+
+
