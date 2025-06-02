@@ -1,0 +1,61 @@
+import pandas as pd
+import numpy as np
+
+
+data=pd.read_csv(r'C:\Users\arran_te5ei3b\OneDrive\Desktop\machine learning\practise\homeowork\Preprocessed_data.csv')
+
+from sklearn.feature_extraction.text import TfidfVectorizer
+
+from sklearn.metrics.pairwise import cosine_similarity
+
+tfidf=TfidfVectorizer(stop_words='english')
+data['Summary']=data['Summary'].fillna('')
+
+#making overview a numerical matrix
+tfidf_matrix=tfidf.fit_transform(data['Summary'])
+print(tfidf_matrix.shape)
+
+
+#gets all the words in this range
+print(tfidf.get_feature_names_out()[1500:1510])
+
+similarity=cosine_similarity(tfidf_matrix,tfidf_matrix)
+print(similarity[:10,:10])
+
+#matching movie types to their index pos
+indices=pd.Series(data.index,index=data['title']).drop_duplicates()
+
+print(indices[0:10])
+
+def reccomendation(title , cosine_sim=similarity):
+    #check if given title exists in data set using index pos ,  
+    #then look up index pos to find that particular movie , 
+    #then get list of movies that are similar to this movie using similarity score,
+    #tag each score to its movie index to sort in descending order,
+    #for everymovie skipping the first match (its self)
+
+    #checkin if title exists
+    if title not in indices:
+        return 'book title not found in dataset'
+    
+    #index pos of the book title
+    idx=indices[title]
+
+    #list of movies that are similar
+    sim_score=list(enumerate(similarity[idx]))
+
+    #sorting order [list of tuples]
+    sim_score=sorted(sim_score , key=lambda x:x[1] , reverse=True)
+
+    #skipping the first one(its self)
+    sim_score=sim_score[1:11]
+
+    book_idx=[i[0] for i in sim_score]
+    return  data['title'].iloc[book_idx]
+
+reccomendation("Classical Mythology")
+
+
+#error due to:
+
+#calculating (1031175 x 1031175) = 1,063,322,370,625 similarity values
