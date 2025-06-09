@@ -1,0 +1,107 @@
+import pandas as pd
+import nltk
+nltk.download('punkt')
+nltk.download('stopwords')
+nltk.download('wordnet')
+from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords
+from nltk.stem import WordNetLemmatizer
+import re
+from sklearn.feature_extraction.text import CountVectorizer
+lemmatizer=WordNetLemmatizer()
+
+#we are setting the delimiter as ; as this is what seperates the text from the target variable in the data set , and we are using names= to define the names of the text and the target
+test=pd.read_csv(r'C:\Users\arran_te5ei3b\OneDrive\Desktop\machine learning\data_sets\test.txt',delimiter=';',names=['text' , 'target'])
+train=pd.read_csv(r'C:\Users\arran_te5ei3b\OneDrive\Desktop\machine learning\data_sets\train.txt',delimiter=';',names=['text' , 'target'])
+
+print(train['target'].unique())
+#['sadness' 'anger' 'love' 'surprise' 'fear' 'joy']
+#computer doesnt know the difference between love surprise joy ect
+#we are making two categories for the computer do decide from : postive emotions and negative emotions
+
+#replacing data with the 2 diffenert options using a dictoinary
+#these two things to choose from is stored in the paramenter data
+def encoding(data):
+    return data.replace({'surprise' : 1 , 'love' : 1 , 'joy' : 1 , 'sadness' : 0 , 'anger' : 0 , 'fear' : 0})
+
+#encoding the train(tagert) to give us the two options for the comupter to decide from
+train['target'] = encoding(train['target'])
+
+def text_transformation(data):
+    cleaned=[]
+    for i in data:
+        #anything that is not a capital letter or a small letter is gonna be removed
+        #empty '' replaces all non letter charictar with a space
+        #str(i) removes all non str
+        item=re.sub('[^a-zA-Z]','',str(i))
+        #.lower makes everything lower case .splt turns it into a list
+        item=item.lower().split()
+        #everything has been lemitized and stop words have been removed and stored in item
+        item=[lemmatizer.lemmatize(i) for i in item if i not in set(stopwords.words('english'))]
+        #adding the scentance to the cleaned list
+        cleaned.append(' '.join(item))
+    return cleaned
+    
+
+cleaned=text_transformation(train['text'])
+#[1] only printing 1
+print(cleaned[1])
+    
+#converting the text to numbers
+#vectrorization
+#ngram range converts clean text into numerical matrix of different counts
+#1 gram means single words like happy
+#2 grams meands two grams like i love
+#this is how it is stored
+cv=CountVectorizer(ngram_range=(1,2))
+
+#fit and transforming cleaned
+X=cv.fit_transform(cleaned)
+
+y=train['target']
+
+from sklearn.ensemble import RandomForestClassifier
+
+rfc=RandomForestClassifier(n_estimators=200)
+
+rfc.fit(X , y)
+
+X_test , y_test = test['text'] , test['target']
+
+#encoding y (since this is different data set than train dataset)
+y_test=encoding(y_test)
+
+X_test = text_transformation(X_test)
+
+X_test = cv.transform(X_test)
+
+y_predict = rfc.predict(X_test)
+
+#evalutation
+from sklearn.metrics import accuracy_score , classification_report
+
+accuracy=accuracy_score(y_test , y_predict)
+print(accuracy)
+
+cr=classification_report(y_test , y_predict)
+print(cr)
+
+def prediction(input):
+    if input==1:
+        print('the input statment has a posotive sentiment')
+    elif input==0:
+        print('the input has 0 sentiment')
+    else:
+        print('invalid output')
+
+def sentiment_predictor(input_text):
+    transformed_text = text_transformation([input_text])  # Ensure it's a list
+    transformed_vector = cv.transform(transformed_text)
+    prediction2 = rfc.predict(transformed_vector)[0]  # Get the single value
+    prediction(prediction2)
+
+input1='i am excited since it is good weather'
+input2='i want to punch someone in the face'
+
+sentiment_predictor(input1)
+sentiment_predictor(input2)
