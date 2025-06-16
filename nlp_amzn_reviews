@@ -1,0 +1,67 @@
+import pandas as pd
+import numpy as np
+from sklearn.feature_extraction.text import TfidfVectorizer
+import nltk
+from nltk.corpus import stopwords
+nltk.download('punkt')
+nltk.download('stopwords')
+from wordcloud import WordCloud
+import matplotlib.pyplot as plt
+
+#pre processing
+data=pd.read_csv(r'C:\Users\arran_te5ei3b\OneDrive\Desktop\machine learning\data_sets\amazon_review.csv')
+print(data.head())
+data.dropna(inplace=True)
+print(data.isnull().sum())
+print(data.info())
+print(data['Sentiment'].unique())
+
+#making all reviews that are 3 stars or under a 0(bad review)
+data.loc[data['Sentiment']<=3,'Sentiment'] = 0
+#making all reviews higher than 3 under a 1(good review)
+data.loc[data['Sentiment']>3,'Sentiment'] = 1
+
+print(data['Sentiment'].unique())
+
+#sw = english stop words
+sw=stopwords.words('english')
+
+#cleaning reviews
+def cleaned_review(review):
+    cleaned=' '.join(i for i in review.split() if i not in sw)
+    return cleaned
+
+data['Review']=data['Review'].apply(cleaned_review)
+
+#checking if worked
+print(data.head(5))
+print(data['Sentiment'].value_counts())
+
+#filterng data frame as reveiws that are negatve(0 rating)
+#convertes any non string
+consolidated=' '.join(i for i in data['Review'][data['Sentiment']==1].astype(str))
+
+#creating word cloud object
+#biggest font size is for the most heard word
+wc=WordCloud(width=1600 , height=800 , random_state=21 , max_font_size=100)
+plt.figure(figsize=(15,10))
+#image show  = generaterd by word cloud
+# bilinear = smoothing out the pixelation
+plt.imshow(wc.generate(consolidated), interpolation='bilinear')
+#getting rid of x and y cords
+plt.axis('off')
+plt.show()
+
+#only keeping 2.5k meaningfull words
+cv=TfidfVectorizer(max_features=2500)
+
+#row = reviews in array and each cloumn=word from the top 2500 words
+X=cv.fit_transform(data['Review'])
+X=X.toarray()
+
+
+
+from sklearn.model_selection import train_test_split
+X_train, X_test , y_train , y_test = train_test_split(X , data['Sentiment'] , random_state=21 , test_size=0.25)
+
+#hw use logistic regression
