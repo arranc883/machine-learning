@@ -1,0 +1,125 @@
+import pandas as pd
+import nltk
+nltk.download('punkt')
+nltk.download('stopwords')
+nltk.download('wordnet')
+from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords
+from nltk.stem import WordNetLemmatizer
+import re
+from sklearn.feature_extraction.text import CountVectorizer
+lemmatizer=WordNetLemmatizer()
+
+#we are setting the delimiter as ; as this is what seperates the text from the target variable in the data set , and we are using names= to define the names of the text and the target
+data=pd.read_csv(r'C:\Users\arran_te5ei3b\OneDrive\Desktop\machine learning\data_sets\Language Detection.csv')
+
+print(data['Language'].unique())
+
+
+def text_transformation(data):
+    cleaned=[]
+    for i in data:
+        #anything that is not a capital letter or a small letter is gonna be removed
+        #empty '' replaces all non letter charictar with a space
+        #str(i) removes all non str
+        item=re.sub('[^a-zA-Z]','',str(i))
+        #.lower makes everything lower case .splt turns it into a list
+        item=item.lower().split()
+        #everything has been lemitized and stop words have been removed and stored in item
+        item=[lemmatizer.lemmatize(i) for i in item if i not in set(stopwords.words('english'))]
+        #adding the scentance to the cleaned list
+        cleaned.append(' '.join(item))
+    return cleaned
+    
+
+cleaned=text_transformation(data['Text'])
+#[1] only printing 1
+print(cleaned[1])
+    
+#converting the text to numbers
+#vectrorization
+#ngram range converts clean text into numerical matrix of different counts
+#1 gram means single words like happy
+#2 grams meands two grams like i love
+#this is how it is stored
+cv=CountVectorizer(ngram_range=(1,2))
+
+#fit and transforming cleaned
+X=cv.fit_transform(cleaned)
+
+y=data['Language']
+
+from sklearn.ensemble import RandomForestClassifier
+
+rfc=RandomForestClassifier(n_estimators=200)
+
+rfc.fit(X , y)
+
+X_test , y_test = data['Text'] , data['Language']
+
+
+X_test = text_transformation(X_test)
+
+X_test = cv.transform(X_test)
+
+y_predict = rfc.predict(X_test)
+
+#evalutation
+from sklearn.metrics import accuracy_score , classification_report
+
+accuracy=accuracy_score(y_test , y_predict)
+print(accuracy)
+
+cr=classification_report(y_test , y_predict)
+print(cr)
+
+def prediction(input):
+    if input == 'English':
+       print('the input statment is English')
+    elif input == 'Malayalam':
+        print('the input statment is Malayalam')
+    elif input == 'Hindi':
+        print('the input statment is Hindi')
+    elif input == 'Tamil':
+        print('the input statment is Tamil')
+    elif input == 'Portugeese':
+        print('the input statment is Portugeese')
+    elif input == 'French':
+        print('the input statment is French')
+    elif input == 'Dutch':
+        print('the input statment is Dutch')
+    elif input == 'Spanish':
+        print('the input statment is Spanish')
+    elif input == 'Greek':
+        print('the input statment is Greek')
+    elif input == 'Russian':
+        print('the input statment is Russian')
+    elif input == 'Danish':
+        print('the input statment is Danish')
+    elif input == 'Italian':
+        print('the input statment is Italian')
+    elif input == 'Turkish':
+        print('the input statment is Turkish')
+    elif input == 'Sweedish':
+        print('the input statment is Sweedish')
+    elif input == 'Arabic':
+        print('the input statment is Arabic')
+    elif input == 'German':
+        print('the input statment is German')
+    elif input == 'Kannada':
+        print('the input statment is Kannada')
+    else:
+        print('Language not recognized')
+
+
+def sentiment_predictor(input_text):
+    transformed_text = text_transformation([input_text])  # Ensure it's a list
+    transformed_vector = cv.transform(transformed_text)
+    prediction2 = rfc.predict(transformed_vector)[0]  # Get the single value
+    prediction(prediction2)
+
+input1='La primera en aparecer fue la de Wikípedo, una hormiga trabajadora dedicada al mantenimiento de sus contribuciones.'
+input2='Därför är dessa avsevärt mer känsliga för starka uppfattningar och kontroversiella påståenden som framförs av dominerande bidragsgivare.'
+
+sentiment_predictor(input1)
+sentiment_predictor(input2)
